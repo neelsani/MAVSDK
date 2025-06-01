@@ -264,38 +264,33 @@ fn addPlugin(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.Build.Ste
     const path = upstream.path(b.fmt("src/mavsdk/plugins/{s}", .{name}));
     const abs_path = path.getPath(b);
 
-    const allocator = b.allocator;
-
-    // Open the directory
-    var dir = std.fs.cwd().openDir(abs_path, .{ .iterate = true }) catch |err| {
-        std.log.err("Failed to open directory '{s}': {}", .{ abs_path, err });
+    // Skip if directory doesn’t exist
+    var dir = std.fs.cwd().openDir(abs_path, .{ .iterate = true }) catch {
+        std.log.warn("Plugin directory '{s}' not found, skipping.", .{abs_path});
         return;
     };
     defer dir.close();
 
-    var cpp_files = std.ArrayList([]const u8).init(allocator);
+    var cpp_files = std.ArrayList([]const u8).init(b.allocator);
     defer cpp_files.deinit();
 
-    // Iterate through all files in the directory
     var iter = dir.iterate();
     while (iter.next() catch null) |entry| {
-        if (entry.kind == .file) {
-            const ext = std.fs.path.extension(entry.name);
-            const is_cpp = std.mem.eql(u8, ext, ".cpp");
-            const is_test = std.mem.containsAtLeast(u8, entry.name, 1, "test");
-
-            if (is_cpp and !is_test) {
-                cpp_files.append(entry.name) catch continue;
-            }
+        // Skip non-files and non-.cpp files early
+        if (entry.kind != .file or !std.mem.endsWith(u8, entry.name, ".cpp")) {
+            continue;
+        }
+        // Skip test files
+        if (!std.mem.containsAtLeast(u8, entry.name, 1, "test")) {
+            cpp_files.append(entry.name) catch continue;
         }
     }
 
-    // Add all found C++ files to the compilation
+    // Add filtered files to compilation
     lib.addCSourceFiles(.{
         .files = cpp_files.items,
         .root = path,
         .language = .cpp,
-
         .flags = &[_][]const u8{
             "-std=c++17",
             "-Wall",
@@ -305,10 +300,10 @@ fn addPlugin(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.Build.Ste
         },
     });
 
+    // Add include paths
     lib.addIncludePath(path.path(b, "include/"));
     lib.installHeadersDirectory(path.path(b, "include/"), "mavsdk/", .{});
 }
-
 pub fn addAllPlugins(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.Build.Step.Compile, disable: []const []const u8) void {
     // Open the directory
 
