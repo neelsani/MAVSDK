@@ -37,7 +37,7 @@
     // internet connectivity.
     .dependencies = .{
         .curl = .{
-            .url = "git+https://github.com/neelsani/curl#df2261fedf49744ef4149e969ba1fca595e2633f",
+            .url = "git+https://github.com/neelsani/curl#b356c9479a91dc65b0fc92b5b81f7beedeb8bb85",
             .hash = "curl-8.13.0-mFDAWCjtAACUBwsX6xOgrLmd-R8qwgvAZ9glaoTP3P2s",
             .lazy = true,
         },
