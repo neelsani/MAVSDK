@@ -191,6 +191,8 @@ pub fn build(b: *Build) void {
     switch (target.result.os.tag) {
         .windows => {
             mavsdk_core.linkSystemLibrary("ws2_32");
+            mavsdk_core.linkSystemLibrary("ole32");
+
             mavsdk_core.root_module.addCMacro("WINDOWS", "");
             if (optimize == .Debug) {
                 // Add debug postfix equivalent if needed
@@ -240,7 +242,13 @@ pub fn build(b: *Build) void {
             b,
             upstream,
             mavsdk_core,
-            &.{},
+            &.{
+                "start_stop_server",
+                "manual_control",
+                "gimbal_device_tester",
+                "camera_server",
+                "battery",
+            },
             target,
             optimize,
         );
@@ -398,7 +406,7 @@ fn buildExample(
             const is_test = std.mem.containsAtLeast(u8, entry.name, 1, "test");
 
             if (is_cpp and !is_test) {
-                cpp_files.append(entry.name) catch continue;
+                cpp_files.append(b.dupe(entry.name)) catch continue;
             }
         }
     }
