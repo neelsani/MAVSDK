@@ -37,8 +37,8 @@
     // internet connectivity.
     .dependencies = .{
         .curl = .{
-            .url = "git+https://github.com/allyourcodebase/curl#b699f96a989ca2ae2d62f9774f436088ed47ea03",
-            .hash = "curl-8.13.0-mFDAWCXtAAAoC5sjcLO6XRYP-ljMSSWdpiYcVnxlt5GN",
+            .url = "git+https://github.com/neelsani/curl#df2261fedf49744ef4149e969ba1fca595e2633f",
+            .hash = "curl-8.13.0-mFDAWCjtAACUBwsX6xOgrLmd-R8qwgvAZ9glaoTP3P2s",
             .lazy = true,
         },
         .mavlink_c = .{
@@ -46,8 +46,8 @@
             .hash = "mavlink_c-0.0.0-JclvXuMPAAAxtDkME9wnFZDt7zPRR6MwhfYFsKdfl3h3",
         },
         .jsoncpp = .{
-            .url = "git+https://github.com/neelsani/jsoncpp#b36a31cc5ad2fda4c9269523ac3a99f68f9c788d",
-            .hash = "jsoncpp-0.0.0-sio8wpwYAADXVePAlfEsEHTY798HMWJ3BWYzE-YB8GNi",
+            .url = "git+https://github.com/neelsani/jsoncpp#b569eacef88251d0e92960e86225ceb1cbbd28f8",
+            .hash = "jsoncpp-0.0.0-sio8ws0XAACblYQ_hjajR3CcOmxAeVerkmP4-zXInhrl",
         },
         .tinyxml2 = .{
             .url = "git+https://github.com/neelsani/tinyxml2#258e77df1e127d78b2b01d6add4100dc2c5d2246",

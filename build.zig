@@ -6,6 +6,7 @@ pub fn build(b: *Build) void {
 
     const upstream = b.dependency("upstream", .{});
 
+    const plugins = b.option(bool, "plugins", "build plugins") orelse true;
     const shared = b.option(bool, "shared", "build as a shared library") orelse false;
     // Create the mavsdk library
     const mavsdk_core = b.addLibrary(.{
@@ -13,6 +14,7 @@ pub fn build(b: *Build) void {
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .link_libcpp = true,
         }),
         .linkage = if (shared) .dynamic else .static,
     });
@@ -95,6 +97,7 @@ pub fn build(b: *Build) void {
 
     mavsdk_core.addCSourceFiles(.{
         .files = &sources,
+        .language = .cpp,
         .flags = &[_][]const u8{
             "-std=c++17",
             "-Wall",
@@ -116,6 +119,8 @@ pub fn build(b: *Build) void {
 
         mavsdk_core.addCSourceFiles(.{
             .files = &curl_sources,
+            .language = .cpp,
+
             .flags = &[_][]const u8{
                 "-std=c++17",
                 "-Wall",
@@ -143,7 +148,7 @@ pub fn build(b: *Build) void {
                 .libidn2 = false,
                 .@"disable-ldap" = true, //System dep remove later ig
             })) |curl_dep| {
-                const libCurl = curl_dep.artifact("curl");
+                const libCurl = curl_dep.artifact("libcurl");
 
                 mavsdk_core.linkLibrary(libCurl);
             }
@@ -213,11 +218,11 @@ pub fn build(b: *Build) void {
     }
 
     // Threading support
-    mavsdk_core.linkLibC();
     mavsdk_core.linkLibCpp();
 
-    addAllPlugins(b, upstream, mavsdk_core, &.{});
-
+    if (plugins) {
+        addAllPlugins(b, upstream, mavsdk_core, &.{});
+    }
     addPlugin(b, upstream, mavsdk_core, "mavlink_passthrough"); //not apart of plugins list
 
     const tinyxml_del = b.dependency("tinyxml2", .{
@@ -233,6 +238,7 @@ pub fn build(b: *Build) void {
     mavsdk_core.linkLibrary(libevents_dep.artifact("libevents"));
 
     mavsdk_core.installHeadersDirectory(upstream.path("src/mavsdk/core/include/mavsdk"), "mavsdk", .{});
+
     b.installArtifact(mavsdk_core);
     if (build_examples) {
         buildExamples(
@@ -244,11 +250,6 @@ pub fn build(b: *Build) void {
             optimize,
         );
     }
-}
-
-fn buildPlugin(b: *std.Build, exe: *std.Build.Step.Compile) void {
-    _ = b;
-    _ = exe;
 }
 
 // Build configuration options
@@ -293,6 +294,8 @@ fn addPlugin(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.Build.Ste
     lib.addCSourceFiles(.{
         .files = cpp_files.items,
         .root = path,
+        .language = .cpp,
+
         .flags = &[_][]const u8{
             "-std=c++17",
             "-Wall",
@@ -412,11 +415,12 @@ fn buildExample(
             }
         }
     }
-
+    example.addIncludePath(lib.getEmittedIncludeTree().path(b, "mavsdk"));
     // Add all found C++ files to the compilation
     example.addCSourceFiles(.{
         .files = cpp_files.items,
         .root = path,
+        .language = .cpp,
         .flags = &[_][]const u8{
             "-std=c++17",
             "-Wall",
