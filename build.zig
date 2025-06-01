@@ -15,6 +15,7 @@ pub fn build(b: *Build) void {
             .target = target,
             .optimize = optimize,
             .link_libcpp = true,
+            .link_libc = true,
         }),
         .linkage = if (shared) .dynamic else .static,
     });
@@ -217,9 +218,6 @@ pub fn build(b: *Build) void {
         mavsdk_core.linkSystemLibrary("log");
     }
 
-    // Threading support
-    mavsdk_core.linkLibCpp();
-
     if (plugins) {
         addAllPlugins(b, upstream, mavsdk_core, &.{});
     }
@@ -265,7 +263,10 @@ fn addPlugin(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.Build.Ste
     const abs_path = path.getPath(b);
 
     // Skip if directory doesn’t exist
-    var dir = std.fs.cwd().openDir(abs_path, .{ .iterate = true }) catch {
+    var dir = std.fs.cwd().openDir(abs_path, .{
+        .iterate = true,
+        .access_sub_paths = false,
+    }) catch {
         std.log.warn("Plugin directory '{s}' not found, skipping.", .{abs_path});
         return;
     };
@@ -282,7 +283,7 @@ fn addPlugin(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.Build.Ste
         }
         // Skip test files
         if (!std.mem.containsAtLeast(u8, entry.name, 1, "test")) {
-            cpp_files.append(entry.name) catch continue;
+            cpp_files.append(b.dupe(entry.name)) catch continue;
         }
     }
 
@@ -322,7 +323,7 @@ pub fn addAllPlugins(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.B
             } else false;
 
             if (!should_disable) {
-                addPlugin(b, upstream, lib, entry);
+                addPlugin(b, upstream, lib, b.dupe(entry));
             }
         }
     }
