@@ -1,5 +1,13 @@
 const std = @import("std");
 const Build = std.Build;
+const mavsdk_flags = &[_][]const u8{
+    "-std=c++17",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-D_USE_MATH_DEFINES",
+    "-w",
+};
 pub fn build(b: *Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -99,13 +107,7 @@ pub fn build(b: *Build) void {
     mavsdk_core.addCSourceFiles(.{
         .files = &sources,
         .language = .cpp,
-        .flags = &[_][]const u8{
-            "-std=c++17",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-w",
-        },
+        .flags = mavsdk_flags,
         .root = upstream.path("src/mavsdk/core"),
     });
 
@@ -122,12 +124,7 @@ pub fn build(b: *Build) void {
             .files = &curl_sources,
             .language = .cpp,
 
-            .flags = &[_][]const u8{
-                "-std=c++17",
-                "-Wall",
-                "-Wextra",
-                "-Werror",
-            },
+            .flags = mavsdk_flags,
             .root = upstream.path("src/mavsdk/core"),
         });
 
@@ -292,13 +289,7 @@ fn addPlugin(b: *std.Build, upstream: *std.Build.Dependency, lib: *std.Build.Ste
         .files = cpp_files.items,
         .root = path,
         .language = .cpp,
-        .flags = &[_][]const u8{
-            "-std=c++17",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-w",
-        },
+        .flags = mavsdk_flags,
     });
 
     // Add include paths
@@ -417,12 +408,6 @@ fn buildExample(
         .files = cpp_files.items,
         .root = path,
         .language = .cpp,
-        .flags = &[_][]const u8{
-            "-std=c++17",
-            "-Wall",
-            "-Wextra",
-            "-Werror",
-            "-w",
-        },
+        .flags = mavsdk_flags,
     });
 }

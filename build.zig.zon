@@ -58,8 +58,8 @@
             .hash = "libevents-0.0.0-R6E_ATMbAACJNSNZydTbpxP0NoQi1vNoV4iuJ1I9vcKd",
         },
         .liblzma = .{
-            .url = "git+https://github.com/neelsani/liblzma#121fdd1968b898fad9c02286d3292b5707cbaffc",
-            .hash = "liblzma-0.0.0-t425WVMWAAAS0F4jKaAARzua6IBRd5DNx-DDHUP9Xp1k",
+            .url = "git+https://github.com/neelsani/liblzma#4ce0f19f06a6f350682cfdb77053bc4ac19969ff",
+            .hash = "liblzma-0.0.0-t425Wd4WAAAk4SM8wtJ_FJpCErz_mpm71UCZv43dNNtd",
         },
         .upstream = .{
             .url = "git+https://github.com/mavlink/MAVSDK#b1b219808572b328481179a183f7f7226079eab2",
